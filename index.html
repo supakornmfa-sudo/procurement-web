@@ -383,6 +383,9 @@ label.f .field { color: var(--ink); font-size: 15px; }
 .gate h2 { font-size: 20px; }
 .gate p { margin: 0; color: var(--muted); font-size: 14px; }
 .gate .gate-err { color: var(--bad); font-weight: 600; }
+.pw { display: flex; gap: 6px; }
+.pw .field { flex: 1; min-width: 0; }
+.pw-eye { flex: none; padding-inline: 12px; }
 
 /* จอขนาดกลาง: ให้เมนูกับปุ่มผู้ดูแลอยู่บรรทัดเดียวกับชื่อเว็บ */
 @media (max-width: 1100px) and (min-width: 761px) {
@@ -477,7 +480,7 @@ label.f .field { color: var(--ink); font-size: 15px; }
   <form class="panel gate" id="gate" hidden>
     <h2>เข้าใช้งานระบบ</h2>
     <p>กรอกรหัสเข้าใช้งานที่ได้รับจากผู้ดูแลระบบ ระบบจะจำไว้ในเบราว์เซอร์นี้</p>
-    <label class="f">รหัสเข้าใช้งาน<input class="field" id="gate-key" type="password" inputmode="numeric" autocomplete="current-password" required></label>
+    <label class="f">รหัสเข้าใช้งาน<span class="pw"><input class="field" id="gate-key" type="password" autocomplete="current-password" autocapitalize="off" spellcheck="false" required><button type="button" class="btn pw-eye" id="gate-eye" aria-label="แสดงรหัส">แสดง</button></span></label>
     <p class="gate-err" id="gate-err" hidden></p>
     <button class="btn primary" type="submit" id="gate-btn">เข้าสู่ระบบ</button>
   </form>
@@ -837,7 +840,7 @@ function openAdminPop() {
     : `<form id="admin-form" class="form" style="padding:0">
       <h2 id="admin-pop-h">เข้าสู่ระบบผู้ดูแล</h2>
       <p>ผู้ดูแลเท่านั้นที่เพิ่มโครงการใหม่ ติดดาวรายการโปรด และโอนงานได้</p>
-      <label class="f">รหัสผู้ดูแล<input class="field num" id="admin-pin" name="pin" type="password" inputmode="numeric" autocomplete="off" required></label>
+      <label class="f">รหัสผู้ดูแล<input class="field num" id="admin-pin" name="pin" type="password" autocomplete="off" required></label>
       <div class="actions"><button class="btn primary" type="submit" data-save>เข้าสู่ระบบ</button><button type="button" class="btn" id="admin-close">ยกเลิก</button></div></form>`;
   pop.hidden = false;
   $("admin-close").onclick = () => pop.hidden = true;
@@ -2277,6 +2280,8 @@ function showGate(msg) {
   $("gate-err").hidden = !msg; $("gate-err").textContent = msg || "";
   $("gate-key").value = ""; $("gate-key").focus();
 }
+// ปุ่มแสดง/ซ่อนรหัส (รหัสยาวพิมพ์ผิดง่าย)
+$("gate-eye").onclick = () => { const k = $("gate-key"), show = k.type === "password"; k.type = show ? "text" : "password"; $("gate-eye").textContent = show ? "ซ่อน" : "แสดง"; k.focus(); };
 $("gate").onsubmit = e => {
   e.preventDefault(); const v = $("gate-key").value.trim(); if (!v) return;
   setAccess(v); $("gate").hidden = true; $("loading").hidden = false; boot();
