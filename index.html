@@ -2017,9 +2017,9 @@ function fillWordXml(xml) {
   paras().filter(p => !inSection.has(p)).forEach(p => fillParagraph(p, g));
 
   kinds.forEach(({ kind, nodes }) => {
-    // ค่าที่ดินฯ: แสดงทุกโครงการเป็นข้อ ๆ (ไม่มีข้อ "รายการอื่น ๆ") ส่วนครุภัณฑ์แสดงเฉพาะรายการโปรด
+    // ค่าที่ดินฯ: แสดงรายการโปรดเป็นข้อ ๆ เรียงตามชีต (ไม่มีข้อ "รายการอื่น ๆ") ส่วนครุภัณฑ์แสดงเฉพาะรายการโปรด
     const listAll = kind !== "ครุภัณฑ์";
-    const rows = D.filter(r => r.kind === kind), favUnits = sortUnits(buildUnits(rows).filter(u => listAll || u.star), listAll ? "sheet" : "budget-desc");   // ครุภัณฑ์: วงเงินมากไปน้อย · ที่ดินฯ: ตามลำดับในชีต
+    const rows = D.filter(r => r.kind === kind), favUnits = sortUnits(buildUnits(rows).filter(u => u.star), listAll ? "sheet" : "budget-desc");   /* ทั้ง 2 หมวดแสดงเฉพาะรายการโปรด */   // ครุภัณฑ์: วงเงินมากไปน้อย · ที่ดินฯ: ตามลำดับในชีต
     const favRows = favUnits.reduce((a, u) => a + u.members.length, 0), favSet = new Set(favUnits.flatMap(u => u.members.map(x => x.row)));
     const others = rows.filter(r => !favSet.has(r.row));
     const sec = { rows: rows.length, sum: sum(rows), favUnits, favRows, othersRows: others.length, othersSum: sum(others), othersPaid: moneyTotals(buildUnits(others)).P };
