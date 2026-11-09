@@ -2208,7 +2208,7 @@ function fillExcelSheet(sheetXml, sstXml, stylesXml) {
         const status = statusSentence(u), method = [...new Set(u.members.map(m => m.method).filter(Boolean))].join(", ");
         cs.A && setNum(cs.A, ++seq); cs.B && setStr(cs.B, name); cs.C && setStr(cs.C, depts); cs.D && setNum(cs.D, Math.round(u.budget * 100) / 100);
         cs.E && setStr(cs.E, u.staff || ""); cs.F && setStr(cs.F, method); cs.G && setStr(cs.G, status);
-        Object.entries(cs).forEach(([col, c]) => c.setAttribute("s", withFill(c.getAttribute("s") || "0", tone, col === "G")));
+        Object.entries(cs).forEach(([col, c]) => c.setAttribute("s", withFill(c.getAttribute("s") || "0", tone, col === "F" || col === "G")));
         // ความสูงแถวโดยประมาณ (Excel ไม่ปรับให้เองตอนเปิดไฟล์)
         const lines = Math.max(1, Math.ceil(visLen(name) / 60), Math.ceil(visLen(status) / 34), Math.ceil(visLen(depts) / 20), Math.ceil(visLen(method) / 12));
         nr.setAttribute("ht", String(Math.round(lines * 18.75 + 2))); nr.setAttribute("customHeight", "1");
