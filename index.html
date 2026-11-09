@@ -76,7 +76,7 @@ header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; b
 header.top .theme-btn { background: transparent; color: var(--bar-fg); border-color: rgba(255, 255, 255, .28); }
 header.top .theme-btn:hover { border-color: var(--gold); }
 header.top .admin-btn[data-on="true"] { border-color: var(--gold); background: rgba(255, 255, 255, .1); color: var(--gold); }
-.wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: 1360px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 .top .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 24px; padding-block: 0; min-height: 84px; }
 .brand-row { padding-block: 14px; }
 .brand { display: flex; flex-direction: column; }
@@ -152,6 +152,8 @@ main { padding-block: 24px 64px; }
 .members td { padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; overflow-wrap: anywhere; }
 .members td.r, .members th.r { text-align: right; white-space: nowrap; }
 .members-box { overflow-x: auto; }
+.members td.nw, .members th.nw { white-space: nowrap; overflow-wrap: normal; }
+.members td.dept, .members th.dept { min-width: 160px; overflow-wrap: normal; }
 .money-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .inst { display: flex; flex-direction: column; gap: 8px; border-top: 1px dashed var(--line); padding-top: 10px; }
 .inst-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; font-size: 13px; color: var(--muted); }
@@ -1101,8 +1103,8 @@ function unitDetail(u) {
     <div class="wide"><dt>คำอธิบายกลุ่ม</dt><dd>${esc(u.g.desc || "-")}</dd></div>
     <div><dt>วงเงินรวมของกลุ่ม</dt><dd class="num">${baht(u.budget)} บาท</dd></div>${common}</dl>
     <div class="members-box"><table class="members">
-      <thead><tr><th>รายการในกลุ่ม (${u.members.length})</th><th>หน่วยงาน</th><th>วิธีจัดซื้อ</th><th class="r">วงเงิน (บาท)</th></tr></thead>
-      <tbody>${u.members.map(m => `<tr><td>${esc(m.name)}<br><small class="note">${esc(m.qty)} ${esc(m.unit)} · ${esc(m.code)}</small></td><td>${esc(m.dept)}</td><td>${esc(m.method)}</td><td class="r num">${baht(m.budget)}</td></tr>`).join("")}</tbody>
+      <thead><tr><th>รายการในกลุ่ม (${u.members.length})</th><th class="dept">หน่วยงาน</th><th class="nw">วิธีจัดซื้อ</th><th class="r">วงเงิน (บาท)</th></tr></thead>
+      <tbody>${u.members.map(m => `<tr><td>${esc(m.name)}<br><small class="note">${esc(m.qty)} ${esc(m.unit)} · ${esc(m.code)}</small></td><td class="dept">${esc(m.dept)}</td><td class="nw">${esc(m.method)}</td><td class="r num">${baht(m.budget)}</td></tr>`).join("")}</tbody>
     </table></div>`;
 }
 
