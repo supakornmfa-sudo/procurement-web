@@ -1120,7 +1120,7 @@ function statusEditor(u) {
     <div class="opts">${STATUSES.map(s => `<label class="opt" style="${toneStyle(s.name)}"><input type="radio" name="status" value="${esc(s.name)}" ${s.name === cur ? "checked" : ""}><span>${s.step ? s.step + ". " : ""}${esc(s.name)}</span></label>`).join("")}</div>
     <div data-money>
       <label class="f">จำนวนเงินก่อหนี้ (บาท)<input class="field num" name="contract" id="c-${k}" inputmode="decimal" placeholder="เช่น ${ex(0.95)}" value="${u.contract != null ? esc(u.contract) : ""}"><span class="note">ไม่เกินวงเงิน ${baht(u.budget)} บาท</span></label>
-      <label class="f">เลขที่ PO <small class="note">(เก็บไว้ในระบบ ไม่แสดงในไฟล์ Word/Excel)</small><input class="field" name="po" id="po-${k}" autocomplete="off" maxlength="60" placeholder="เช่น 4100012345" value="${esc(u.po || "")}"></label>
+      <label class="f">เลขที่ PO<input class="field" name="po" id="po-${k}" autocomplete="off" maxlength="60" placeholder="เช่น 4100012345" value="${esc(u.po || "")}"></label>
     </div>
     <div class="inst" data-inst>
       <div class="inst-head"><span>จำนวนงวดเบิกจ่าย</span>
