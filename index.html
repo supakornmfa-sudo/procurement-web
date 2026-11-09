@@ -155,11 +155,12 @@ main { padding-block: 24px 64px; }
 .money-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .inst { display: flex; flex-direction: column; gap: 8px; border-top: 1px dashed var(--line); padding-top: 10px; }
 .inst-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; font-size: 13px; color: var(--muted); }
-.stepper { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); overflow: hidden; }
-.stepper button { border: 0; background: none; width: 36px; height: 34px; font-size: 18px; cursor: pointer; color: var(--accent); }
+.stepper { display: inline-flex; align-items: stretch; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); overflow: hidden; height: 36px; }
+.stepper button { border: 0; background: none; width: 36px; padding: 0; cursor: pointer; color: var(--accent); display: grid; place-items: center; }
+.stepper button svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; fill: none; }
 .stepper button:hover { background: var(--accent-soft); }
-.stepper button:disabled { color: var(--line); cursor: default; background: none; }
-.stepper output { min-width: 34px; text-align: center; font-family: var(--font-display); font-weight: 600; font-size: 16px; color: var(--ink); }
+.stepper button:disabled { color: var(--muted); opacity: .35; cursor: default; background: none; }
+.stepper output { min-width: 40px; display: grid; place-items: center; border-inline: 1px solid var(--line); font-family: var(--font-body); font-weight: 600; font-size: 15px; color: var(--ink); font-variant-numeric: tabular-nums; }
 .inst-row { display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; gap: 10px; align-items: center; font-size: 14px; }
 .inst-row .field { width: 100%; }
 .inst-row label.chk { display: flex; gap: 6px; align-items: center; font-size: 13px; white-space: nowrap; cursor: pointer; }
@@ -1123,7 +1124,7 @@ function statusEditor(u) {
     </div>
     <div class="inst" data-inst>
       <div class="inst-head"><span>จำนวนงวดเบิกจ่าย</span>
-        <span class="stepper"><button type="button" data-step="-1" aria-label="ลดจำนวนงวด">−</button><output data-n>1</output><button type="button" data-step="1" aria-label="เพิ่มจำนวนงวด">+</button></span>
+        <span class="stepper"><button type="button" data-step="-1" aria-label="ลดจำนวนงวด"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7h10"/></svg></button><output data-n>1</output><button type="button" data-step="1" aria-label="เพิ่มจำนวนงวด"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7h10M7 2v10"/></svg></button></span>
         <span>ติ๊ก "เบิกแล้ว" ในงวดที่เบิกจ่ายแล้ว</span></div>
       <div data-rows style="display:flex;flex-direction:column;gap:8px"></div>
       <div class="inst-sum" data-sum></div>
