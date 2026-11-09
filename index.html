@@ -665,7 +665,7 @@ function parseInst(text) {
 // เงินที่โอนออกจากกลุ่ม แบ่งหักจากสมาชิกตามสัดส่วนวงเงิน
 function currentBudgets(rows, transfers) {
   const base = {}, cur = {}, byGroup = {};
-  rows.forEach(r => { base[r.uid] = r.isNew ? 0 : (Number(r.alloc) || 0); cur[r.uid] = base[r.uid]; if (r.group) (byGroup[r.group] = byGroup[r.group] || []).push(r); });
+  rows.forEach(r => { base[r.uid] = r.isNew && !r.noSrc ? 0 : (Number(r.alloc) || 0); /* โครงการใหม่ที่ไม่ระบุแหล่งเงิน ใช้วงเงินที่กรอกเอง */ cur[r.uid] = base[r.uid]; if (r.group) (byGroup[r.group] = byGroup[r.group] || []).push(r); });
   transfers.forEach(t => {
     const a = Number(t.amount) || 0;
     if (t.dst in cur) cur[t.dst] += a;
@@ -802,13 +802,15 @@ function demoApi() {
     addProject: wrap((pj, sources, auth) => {
       demoAdmin(auth);
       if (!pj.name) throw new Error("กรุณากรอกชื่อโครงการ");
+      if (pj.noSource && (pj.plan !== PLAN_OTHER || !(pj.budget > 0))) throw new Error("ไม่ระบุแหล่งเงินได้เฉพาะแผนอื่นๆ และต้องใส่วงเงิน");
+      if (!pj.noSource && !sources.length) throw new Error("กรุณาเพิ่มแหล่งเงินอย่างน้อย 1 แหล่ง");
       const units = new Map(allUnits().map(u => [u.fkey, u])), used = {}, now = new Date().toISOString();
       sources.forEach(s => { const u = units.get(s.src); if (!u) throw new Error("ไม่พบโครงการต้นทาง");
         used[s.src] = (used[s.src] || 0) + s.amount; if (used[s.src] > availableOf(u) + 0.005) throw new Error(`"${u.name}" มีเงินให้ใช้ได้ไม่พอ`); });
-      const total = sources.reduce((t, s) => t + s.amount, 0), row = Math.max(...db.projects.map(p => p.row)) + 1;
+      const total = pj.noSource ? pj.budget : sources.reduce((t, s) => t + s.amount, 0), row = Math.max(...db.projects.map(p => p.row)) + 1;
       const uid = "P" + String(Math.max(...db.projects.map(p => +p.uid.slice(1))) + 1).padStart(4, "0");
       db.projects.push({ row, code: pj.code, kind: pj.kind, type: pj.type, name: pj.name, qty: pj.qty, unit: pj.unit, budget: total, dept: pj.dept, staff: pj.staff, method: pj.method,
-        status: "", detail: "", updated: now, group: "", contract: "", paid: "", inst: "", plan: pj.plan, star: false, isNew: true, uid });
+        status: "", detail: "", updated: now, group: "", contract: "", paid: "", inst: "", plan: pj.plan, star: false, isNew: true, noSrc: !!pj.noSource, uid });
       sources.forEach(s => db.transfers.push({ date: now, type: s.type, src: s.src, srcName: units.get(s.src).name, dst: uid, dstName: pj.name, amount: s.amount }));
       Object.keys(used).forEach(k => { const u = units.get(k);
         if (u.done || u.contract != null || u.paid != null || Math.abs(used[k] - availableOf(u)) > 0.005) return;
@@ -851,7 +853,7 @@ function toast(msg, ms = 3000) { const t = $("toast"); t.textContent = msg; t.hi
 function setData(d) {
   STAFF = d.staff.map(s => ({ ...s, first: String(s.first).trim(), active: s.active !== false }));
   GROUPS = new Map((d.groups || []).map(g => [g.id, { ...g, contract: amt(g.contract), paid: amt(g.paid), inst: parseInst(g.inst) }]));
-  DATA = d.projects.filter(p => p.name).map(p => ({ ...p, alloc: Number(p.budget) || 0, isNew: !!p.isNew, uid: p.uid || "R" + p.row, staff: String(p.staff || "").trim(),
+  DATA = d.projects.filter(p => p.name).map(p => ({ ...p, alloc: Number(p.budget) || 0, isNew: !!p.isNew, noSrc: !!p.noSrc, uid: p.uid || "R" + p.row, staff: String(p.staff || "").trim(),
     status: String(p.status || "").trim() || FIRST_STATUS, group: GROUPS.has(p.group) ? p.group : "",
     contract: amt(p.contract), paid: amt(p.paid), inst: parseInst(p.inst), plan: p.plan === PLAN_OTHER ? PLAN_OTHER : PLAN_MAIN, star: !!p.star }));
   // วงเงินปัจจุบัน = วงเงินที่ได้รับจัดสรร + รับโอน − โอนออก (ใช้ตัวเลขนี้ทุกที่ในหน้าเว็บ)
@@ -1350,8 +1352,12 @@ function renderNewProject() {
     <datalist id="np-dl-method">${uniq("method").map(x => `<option value="${esc(x)}">`).join("")}</datalist>
     <datalist id="np-dl-unit">${uniq("unit").map(x => `<option value="${esc(x)}">`).join("")}</datalist>
     <h3>แหล่งเงิน</h3>
+    <label class="chk" id="np-unknown-wrap" ${np.plan === PLAN_OTHER ? "" : "hidden"}><input type="checkbox" id="np-unknown" ${np.unknown ? "checked" : ""}> ยังไม่ทราบแหล่งที่มาของเงิน (กรอกวงเงินเอง)</label>
+    <label class="f" id="np-budget-wrap" style="max-width:320px" ${np.plan === PLAN_OTHER && np.unknown ? "" : "hidden"}>วงเงินโครงการ (บาท) *<input class="field num" id="np-budget" inputmode="decimal" placeholder="เช่น 1,500,000" value="${esc(np.budget || "")}"></label>
+    <div id="np-src-box" ${np.plan === PLAN_OTHER && np.unknown ? "hidden" : ""} style="display:flex;flex-direction:column;gap:10px">
     <div id="np-sources" style="display:flex;flex-direction:column;gap:10px"></div>
     <div><button type="button" class="linkbtn" id="np-add">+ เพิ่มแหล่งเงิน</button></div>
+    </div>
     <div class="inst-sum" id="np-sum"></div>
     <div class="actions"><button class="btn primary" type="submit" data-save>บันทึกโครงการใหม่</button><button class="btn" type="button" id="np-cancel">ยกเลิก</button></div>
   </form>`;
@@ -1360,8 +1366,17 @@ function renderNewProject() {
     readSources(); np.plan = b.dataset.npPlan;
     np.sources.forEach(s => { s.src = ""; s.q = ""; if (np.plan === PLAN_OTHER) s.type = T_MOVE; });
     f.querySelectorAll("[data-np-plan]").forEach(x => x.setAttribute("aria-pressed", x.dataset.npPlan === np.plan));
-    drawSources();
+    syncUnknown(); drawSources();
   });
+  // แผนอื่นๆ: เลือก "ยังไม่ทราบแหล่งที่มาของเงิน" แล้วกรอกวงเงินเองได้
+  const syncUnknown = () => {
+    const other = np.plan === PLAN_OTHER, unk = other && $("np-unknown").checked;
+    np.unknown = $("np-unknown").checked;
+    $("np-unknown-wrap").hidden = !other; $("np-budget-wrap").hidden = !unk; $("np-src-box").hidden = unk;
+    npSummary();
+  };
+  $("np-unknown").onchange = () => { syncUnknown(); if (np.unknown && np.plan === PLAN_OTHER) $("np-budget").focus(); };
+  $("np-budget").oninput = () => { np.budget = $("np-budget").value; npSummary(); };
   $("np-add").onclick = () => { readSources(); np.sources.push({ type: np.plan === PLAN_OTHER ? T_MOVE : T_LEFT, src: "", amount: "" }); drawSources(); };
   $("np-cancel").onclick = closeNewProject;
   setupDeptPicker();
@@ -1470,6 +1485,11 @@ function setupCombo(r, i) {
 }
 // ตรวจยอดแต่ละแหล่ง และสรุปวงเงินโครงการใหม่
 function npSummary() {
+  if (state.np.plan === PLAN_OTHER && state.np.unknown) {
+    const b = parseMoney(state.np.budget || "");
+    $("np-sum").innerHTML = `วงเงินโครงการใหม่: <b class="num">${b !== "" && !Number.isNaN(b) ? baht(b) : "-"}</b> บาท · <span class="note">ยังไม่ระบุแหล่งเงิน (แผนอื่นๆ ไม่นับในหน้าภาพรวม)</span>`;
+    return b !== "" && !Number.isNaN(b) && b > 0;
+  }
   const np = state.np, units = new Map(allUnits().map(u => [u.fkey, u])), used = {};
   let total = 0, ok = true;
   const rows = [...document.querySelectorAll("#np-sources .src-row")];
@@ -1497,12 +1517,19 @@ async function submitNewProject(e) {
   const f = e.target, np = state.np, v = n => f[n].value.trim();
   if (!v("name")) { toast("กรุณากรอกชื่อโครงการ"); f.name.focus(); return; }
   if (!v("staff")) { toast("กรุณาเลือกเจ้าหน้าที่รับผิดชอบ"); f.staff.focus(); return; }
+  const unknown = np.plan === PLAN_OTHER && np.unknown;
+  if (unknown) {
+    const b = parseMoney(np.budget || "");
+    if (b === "" || Number.isNaN(b) || b <= 0) { toast("กรุณาใส่วงเงินโครงการ"); $("np-budget").focus(); return; }
+  } else {
   if (np.sources.some(s => !s.src)) { toast("กรุณาเลือกโครงการต้นทางจากรายการที่แนะนำให้ครบทุกแหล่ง"); return; }
   const sources = np.sources.map(s => ({ type: s.type, src: s.src, amount: parseMoney(s.amount) }));
   if (sources.some(s => s.amount === "" || Number.isNaN(s.amount) || s.amount <= 0)) { toast("กรุณาใส่จำนวนเงินของทุกแหล่ง"); return; }
   if (!npSummary()) { toast("มีแหล่งเงินที่ใช้เกินเงินที่มี"); return; }
-  const pj = { name: v("name"), staff: v("staff"), dept: np.depts.join(", "), method: v("method"), kind: v("kind"), type: v("type") === "__other" ? v("typeOther") : v("type"), code: v("code"), qty: v("qty"), unit: v("unit"), plan: np.plan };
-  if (await run(() => api.addProject(pj, sources, auth()), `เพิ่มโครงการ "${pj.name}" แล้ว`)) {
+  }
+  const sourcesOut = unknown ? [] : np.sources.map(s => ({ type: s.type, src: s.src, amount: parseMoney(s.amount) }));
+  const pj = { name: v("name"), staff: v("staff"), dept: np.depts.join(", "), method: v("method"), kind: v("kind"), type: v("type") === "__other" ? v("typeOther") : v("type"), code: v("code"), qty: v("qty"), unit: v("unit"), plan: np.plan, ...(unknown ? { noSource: true, budget: parseMoney(np.budget) } : {}) };
+  if (await run(() => api.addProject(pj, sourcesOut, auth()), `เพิ่มโครงการ "${pj.name}" แล้ว`)) {
     closeNewProject();
     const added = DATA.filter(r => r.isNew && r.name === pj.name).sort((a, b) => b.row - a.row)[0];
     Object.assign(state, { status: "ทั้งหมด", kind: "ทั้งหมด", plan: "ทั้งหมด", starOnly: false, moveOnly: false, q: "", sort: "recent", openKey: added ? "r:" + added.row : null });
