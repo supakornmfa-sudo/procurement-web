@@ -1366,8 +1366,10 @@ function renderNewProject() {
   $("np-cancel").onclick = closeNewProject;
   setupDeptPicker();
   // ประเภท: แสดงเฉพาะประเภทของหมวดค่าที่เลือก (จากข้อมูลเดิมในชีต) + ระบุเอง
+  const TYPE_FIRST = ["ครุภัณฑ์สำนักงาน"];   // ตัวแรกในรายการ = ค่าเริ่มต้น
   const fillTypes = () => {
-    const types = [...new Set(DATA.filter(r => r.kind === f.kind.value).map(r => r.type).filter(Boolean))].sort((a, b) => a.localeCompare(b, "th"));
+    const types = [...new Set(DATA.filter(r => r.kind === f.kind.value).map(r => r.type).filter(Boolean))]
+      .sort((a, b) => (TYPE_FIRST.indexOf(b) - TYPE_FIRST.indexOf(a)) || a.localeCompare(b, "th"));   // ประเภทที่ใช้บ่อยขึ้นก่อน
     f.type.innerHTML = types.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join("") + `<option value="__other">อื่นๆ (ระบุเอง)</option>`;
     $("np-type-other-wrap").hidden = f.type.value !== "__other";
   };
