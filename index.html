@@ -793,7 +793,7 @@ function demoApi() {
       if (s.first !== orig) db.projects.forEach(p => { if (p.staff === orig) p.staff = s.first; });
       Object.assign(x, s);
     }),
-    setPlan: wrap((items, plan) => { items.forEach(it => { find(it.row, it.name).plan = plan; }); }),
+    setPlan: wrap((items, plan, auth) => { demoAdmin(auth); items.forEach(it => { find(it.row, it.name).plan = plan; }); }),
     setStar: wrap((items, on, auth) => { demoAdmin(auth); items.forEach(it => { find(it.row, it.name).star = on; }); }),
     setPhoto: wrap((first, photo) => { const x = db.staff.find(x => x.first === first); if (!x) throw new Error("ไม่พบเจ้าหน้าที่"); x.photo = photo; }),
     addProject: wrap((pj, sources, auth) => {
@@ -1106,6 +1106,7 @@ function unitDetail(u) {
 }
 
 function planControl(u) {
+  if (!isAdmin()) return "";   // เปลี่ยนแผนงานได้เฉพาะผู้ดูแล
   return `<div class="plan-row"><span>แผนงาน</span><span class="seg-ctl">${[PLAN_MAIN, PLAN_OTHER].map(p => `<button type="button" data-plan="${esc(p)}" data-unit-key="${esc(u.key)}" aria-pressed="${u.plan === p}">${esc(p)}</button>`).join("")}</span>
     <span>${u.plan === PLAN_OTHER ? "ไม่นับในหน้าภาพรวม" : "นับในหน้าภาพรวม"}</span></div>`;
 }
@@ -1268,7 +1269,7 @@ function bindRows(root, rerender) {
   });
   root.querySelectorAll("[data-plan]").forEach(b => b.onclick = async () => {
     const u = allUnits().find(x => x.key === b.dataset.unitKey); if (!u || u.plan === b.dataset.plan) return;
-    if (await run(() => api.setPlan(u.members.map(m => ({ row: m.row, name: m.name })), b.dataset.plan), b.dataset.plan === PLAN_OTHER ? "ย้ายไปแผนอื่นๆ แล้ว (ไม่นับในหน้าภาพรวม)" : "ย้ายไปแผนงานพื้นฐานด้านความมั่นคงแล้ว")) rerender();
+    if (await run(() => api.setPlan(u.members.map(m => ({ row: m.row, name: m.name })), b.dataset.plan, auth()), b.dataset.plan === PLAN_OTHER ? "ย้ายไปแผนอื่นๆ แล้ว (ไม่นับในหน้าภาพรวม)" : "ย้ายไปแผนงานพื้นฐานด้านความมั่นคงแล้ว")) rerender();
   });
   root.querySelectorAll("[data-goto-staff]").forEach(b => b.onclick = () => { state.staff = b.dataset.gotoStaff; state.openKey = b.dataset.gotoKey; state.panel = "view"; state.staffView = "detail"; go("staff"); });
   root.querySelectorAll("[data-edit-group]").forEach(b => b.onclick = () => { state.panel = "group"; state.groupId = b.dataset.editGroup; renderStaff(); });
