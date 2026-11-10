@@ -488,6 +488,19 @@ label.f .field { color: var(--ink); font-size: 15px; }
 /* ---- ช่องก่อหนี้ + เลขที่ PO ---- */
 [data-money] { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: start; }
 @media (max-width: 760px) { [data-money] { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---- การใช้วงเงิน: การ์ดสูงเท่าการ์ดแยกตามหมวด กราฟและคำอธิบายใหญ่ขึ้น ---- */
+.two.eq { align-items: stretch; }
+.two.eq > .panel { display: flex; flex-direction: column; }
+.two.eq .donut-wrap { flex: 1; grid-template-columns: 220px minmax(0, 1fr); gap: 28px; padding: 24px 26px; align-content: center; }
+.two.eq .donut { width: 220px; height: 220px; }
+.two.eq .legend { gap: 18px; }
+.two.eq .legend li { font-size: 15px; font-weight: 500; }
+.two.eq .legend .sw { width: 14px; height: 14px; }
+.two.eq .legend .pct { font-size: 19px; }
+.two.eq .legend .amt { font-size: 14px; }
+@media (max-width: 1100px) { .two.eq .donut-wrap { grid-template-columns: 180px minmax(0, 1fr); gap: 20px; padding: 18px; } .two.eq .donut { width: 180px; height: 180px; } }
+@media (max-width: 760px) { .two.eq .donut-wrap { grid-template-columns: minmax(0, 1fr); justify-items: center; } }
 </style>
 
 <header class="top">
@@ -540,7 +553,7 @@ label.f .field { color: var(--ink); font-size: 15px; }
       <div class="status-grid side" id="status-side"></div>
       <div class="stack" id="status-stack" aria-hidden="true"></div>
     </div>
-    <div class="two">
+    <div class="two eq">
       <div class="panel"><div class="panel-h"><h2>การใช้วงเงิน</h2><span>ร้อยละของวงเงินรวม</span></div><div class="donut-wrap" id="donut"></div><p class="chart-note" id="donut-note" hidden>ยังไม่มีการบันทึกจำนวนเงิน ใส่จำนวนเงินได้ตอนเปลี่ยนสถานะเป็น "ก่อหนี้/บริหารสัญญา" หรือ "เบิกจ่าย"</p></div>
       <div class="panel"><div class="panel-h"><h2>แยกตามหมวดค่าใช้จ่าย</h2><span>โครงการ · วงเงิน (ร้อยละ)</span></div><ul class="bars" id="bars-team"></ul></div>
     </div>
@@ -1057,7 +1070,6 @@ function renderDonut(total, m) {
     </svg>
     <ul class="legend">
       ${segs.map(s => `<li><span class="sw" style="background:${s.color}"></span><span>${s.label}</span><span class="pct num">${pct(s.v, total)}</span><span class="amt num"><span>${baht(s.v)} บาท</span></span></li>`).join("")}
-      <li class="total"><span></span><span>ก่อหนี้แล้วทั้งหมด</span><span class="pct num">${pct(m.C, total)}</span><span class="amt num"><span>${baht(m.C)} บาท จากวงเงิน ${baht(total)} บาท</span></span></li>
     </ul>
     <div class="tip" id="donut-tip" hidden></div>`;
   $("donut-note").hidden = m.C > 0 || m.P > 0;
