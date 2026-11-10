@@ -981,12 +981,15 @@ function renderDashboard() {
 
   const by = groupBy(D, r => bucket(r.status));
   const inInst = units.filter(u => u.progress).length;
+  // การ์ดก่อหนี้: ใช้จำนวนเงินก่อหนี้ที่บันทึกไว้ (การ์ดอื่นใช้วงเงิน)
+  const cardAmt = (st, rows) => st.name === S_CONTRACT
+    ? units.filter(u => bucket(u.status) === S_CONTRACT).reduce((t, u) => t + (u.contract || 0), 0) : sum(rows);
   const card = st => { const rows = by.get(st.name) || []; return `
     <button class="scard" style="${toneStyle(st.name)}" data-status="${esc(st.name)}">
       ${st.step ? `<span class="step">ขั้นที่ ${st.step}</span>` : ""}
       <span class="name">${esc(st.name)}</span>
       <span class="count num">${rows.length}<small>โครงการ</small></span>
-      <span class="money num">${short(sum(rows))} · ${pct(sum(rows), total)}</span>
+      <span class="money num">${short(cardAmt(st, rows))} · ${pct(cardAmt(st, rows), total)}</span>
       ${st.name === S_CONTRACT && inInst ? `<span class="money">อยู่ระหว่างเบิกจ่ายเป็นงวด ${inInst} รายการ</span>` : ""}
     </button>`; };
   $("status-main").innerHTML = STATUSES.filter(s => s.step).map(card).join("");
