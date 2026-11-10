@@ -503,6 +503,9 @@ label.f .field { color: var(--ink); font-size: 15px; }
 @media (max-width: 760px) { .two.eq .donut-wrap { grid-template-columns: minmax(0, 1fr); justify-items: center; } }
 
 .pqty { color: var(--muted); font-weight: 400; white-space: nowrap; }
+
+.s-search { padding: 12px 18px 4px; }
+.s-search .field { width: 100%; }
 </style>
 
 <header class="top">
@@ -1608,7 +1611,7 @@ function renderStaff() {
     ${idle.length ? `<details class="gone" ${idle.some(s => s.first === state.staff) ? "open" : ""}><summary>ยังไม่มีโครงการ (${idle.length} คน)</summary><ul class="slist">${idle.map(s => staffButton(s, [])).join("")}</ul></details>` : ""}
     ${gone.length ? `<details class="gone" ${gone.some(s => s.first === state.staff) ? "open" : ""}><summary>พ้นจากหน้าที่ (${gone.length} คน)</summary><ul class="slist">${gone.map(s => staffButton(s, byStaff.get(s.first) || [])).join("")}</ul></details>` : ""}`;
   $("sside").querySelectorAll("[data-staff]").forEach(b => b.onclick = () => {
-    state.staff = b.dataset.staff; state.openKey = null; state.panel = "view"; state.staffView = "detail"; renderStaff();
+    state.staff = b.dataset.staff; state.openKey = null; state.panel = "view"; state.sq = ""; state.staffView = "detail"; renderStaff();
     if (matchMedia("(max-width: 760px)").matches) window.scrollTo(0, 0);
   });
   $("btn-add").onclick = () => { state.panel = "add"; state.staffView = "detail"; renderStaff(); window.scrollTo(0, 0); $("f-first")?.focus(); };
@@ -1641,9 +1644,19 @@ function renderStaff() {
       <div class="m"><div class="lbl">สถานะ</div><div class="mini-pills">${st.length ? st.map(([k, r]) => `${pill(k)}<span class="num">${r.length}</span>`).join(" ") : "-"}</div></div>
     </div>
     ${s.orphan ? `<p class="warn" style="margin:12px 18px">ชื่อนี้อยู่ในคอลัมน์ "จนท" ของชีต แต่ไม่มีในรายชื่อเจ้าหน้าที่ กรุณาโอนงานให้เจ้าหน้าที่ในรายชื่อ</p>` : ""}
+    ${units.length > 1 ? `<div class="s-search"><input class="field" id="sq" type="search" placeholder="ค้นหาโครงการของ ${esc(s.first)} (ชื่อโครงการ หน่วยงาน รหัสงบ หรือเลขที่ PO)" aria-label="ค้นหาโครงการของเจ้าหน้าที่" value="${esc(state.sq || "")}"></div>` : ""}
     <div class="list-head"><span>ชื่อโครงการ · กดเพื่อเปลี่ยนสถานะ</span><span>วงเงิน (บาท)</span><span>สถานะ</span></div>
-    <ul class="plist" id="splist">${units.length ? unitRows(units, true) : `<li class="empty">ไม่มีโครงการที่รับผิดชอบ</li>`}</ul>`;
-  bindRows($("splist"), renderStaff);
+    <ul class="plist" id="splist"></ul>`;
+  // ค้นหาเฉพาะโครงการของเจ้าหน้าที่คนนี้ (ไม่มีตัวกรองอื่น)
+  const drawList = () => {
+    const q = (state.sq || "").trim().toLowerCase();
+    const list = q ? units.filter(u => [u.name, u.po, u.isGroup ? u.g.desc : "", ...u.members.flatMap(m => [m.name, m.dept, m.type, m.code])].join(" ").toLowerCase().includes(q)) : units;
+    $("splist").innerHTML = !units.length ? `<li class="empty">ไม่มีโครงการที่รับผิดชอบ</li>`
+      : list.length ? unitRows(list, true) : `<li class="empty">ไม่พบโครงการที่ตรงกับ "${esc(state.sq.trim())}"</li>`;
+    bindRows($("splist"), renderStaff);
+  };
+  drawList();
+  if ($("sq")) $("sq").oninput = e => { state.sq = e.target.value; drawList(); };
   $("btn-transfer") && ($("btn-transfer").onclick = () => { state.panel = "transfer"; renderStaff(); });
   $("btn-edit") && ($("btn-edit").onclick = () => { state.panel = "edit"; renderStaff(); });
   $("btn-group") && ($("btn-group").onclick = () => { state.panel = "group"; state.groupId = null; renderStaff(); });
