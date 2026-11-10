@@ -501,6 +501,8 @@ label.f .field { color: var(--ink); font-size: 15px; }
 .two.eq .legend .amt { font-size: 14px; }
 @media (max-width: 1100px) { .two.eq .donut-wrap { grid-template-columns: 180px minmax(0, 1fr); gap: 20px; padding: 18px; } .two.eq .donut { width: 180px; height: 180px; } }
 @media (max-width: 760px) { .two.eq .donut-wrap { grid-template-columns: minmax(0, 1fr); justify-items: center; } }
+
+.pqty { color: var(--muted); font-weight: 400; white-space: nowrap; }
 </style>
 
 <header class="top">
@@ -1260,6 +1262,9 @@ function setupEditor(f, u, rerender) {
 }
 
 const STAR_SVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.8 5.7 6.3.9-4.6 4.4 1.1 6.2L12 17.1 6.4 20l1.1-6.2L2.9 9.4l6.3-.9z"/></svg>`;
+// จำนวน + หน่วยนับต่อท้ายชื่อโครงการ เช่น " · 1 ตู้" (เฉพาะรายการเดี่ยว)
+const qtyText = u => { if (u.isGroup) return ""; const m = u.members[0], t = [m.qty, m.unit].map(x => String(x ?? "").trim()).filter(Boolean).join(" ");
+  return t ? `<span class="pqty"> · ${esc(t)}</span>` : ""; };
 const starButton = u => !isAdmin() ? (u.star ? `<span class="star" aria-pressed="true" role="img" aria-label="รายการโปรด" title="รายการโปรด">${STAR_SVG}</span>` : "") : `<button type="button" class="star" data-star="${esc(u.key)}" aria-pressed="${u.star}" aria-label="${u.star ? "เอาออกจากรายการโปรด" : "เพิ่มในรายการโปรด"}" title="${u.star ? "เอาออกจากรายการโปรด" : "เพิ่มในรายการโปรด"}">${STAR_SVG}</button>`;
 function unitRows(units, editable) {
   if (!units.length) return `<li class="empty">ไม่พบโครงการที่ตรงกับเงื่อนไข</li>`;
@@ -1268,7 +1273,7 @@ function unitRows(units, editable) {
     return `
     <li class="prow">
       <div class="prow-h" role="button" tabindex="0" data-unit="${esc(u.key)}" aria-expanded="${state.openKey === u.key}">
-        <span class="pname">${isNew(u) ? `<span class="tag-new">NEW</span>` : ""}${u.isGroup ? `<span class="tag-group">กลุ่ม</span>` : ""}${u.isNew ? `<span class="tag-np">โครงการใหม่</span>` : ""}${u.plan === PLAN_OTHER ? `<span class="tag-plan">แผนอื่นๆ</span>` : ""}${esc(u.name)}${starButton(u)}<small>${esc(sub)}${editable ? "" : " · " + esc(u.staff || "ไม่ระบุ")}</small></span>
+        <span class="pname">${isNew(u) ? `<span class="tag-new">NEW</span>` : ""}${u.isGroup ? `<span class="tag-group">กลุ่ม</span>` : ""}${u.isNew ? `<span class="tag-np">โครงการใหม่</span>` : ""}${u.plan === PLAN_OTHER ? `<span class="tag-plan">แผนอื่นๆ</span>` : ""}${esc(u.name)}${qtyText(u)}${starButton(u)}<small>${esc(sub)}${editable ? "" : " · " + esc(u.staff || "ไม่ระบุ")}</small></span>
         <span class="pbudget">${baht(u.budget)}</span>
         <span class="pstatus">${unitPill(u)}</span>
       </div>
