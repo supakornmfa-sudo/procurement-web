@@ -981,21 +981,12 @@ function renderDashboard() {
 
   const by = groupBy(D, r => bucket(r.status));
   const inInst = units.filter(u => u.progress).length;
-  // ก่อหนี้ / เบิกจ่าย: แสดงจำนวนเงินก่อหนี้หรือเบิกจ่ายจริง และร้อยละของวงเงินโครงการในสถานะนั้น
-  const moneyLine = (st, rows) => {
-    const us = units.filter(u => bucket(u.status) === st.name), b = us.reduce((t, u) => t + u.budget, 0);
-    const field = st.name === S_CONTRACT ? "contract" : st.name === S_PAID ? "paid" : null;
-    if (!field || !us.length) return `<span class="money num">${short(sum(rows))} · ${pct(sum(rows), total)}</span>`;
-    const amt = us.reduce((t, u) => t + (u[field] || 0), 0);
-    return `<span class="money num"><b>${field === "contract" ? "ก่อหนี้" : "เบิกจ่าย"} ${baht(amt)} บาท</b> (${pct(amt, b)} ของวงเงิน)</span>
-      <span class="money num">วงเงิน ${baht(b)} บาท</span>`;
-  };
   const card = st => { const rows = by.get(st.name) || []; return `
     <button class="scard" style="${toneStyle(st.name)}" data-status="${esc(st.name)}">
       ${st.step ? `<span class="step">ขั้นที่ ${st.step}</span>` : ""}
       <span class="name">${esc(st.name)}</span>
       <span class="count num">${rows.length}<small>โครงการ</small></span>
-      ${moneyLine(st, rows)}
+      <span class="money num">${short(sum(rows))} · ${pct(sum(rows), total)}</span>
       ${st.name === S_CONTRACT && inInst ? `<span class="money">อยู่ระหว่างเบิกจ่ายเป็นงวด ${inInst} รายการ</span>` : ""}
     </button>`; };
   $("status-main").innerHTML = STATUSES.filter(s => s.step).map(card).join("");
