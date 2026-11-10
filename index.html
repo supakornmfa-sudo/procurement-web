@@ -1644,7 +1644,7 @@ function renderStaff() {
       <div class="m"><div class="lbl">สถานะ</div><div class="mini-pills">${st.length ? st.map(([k, r]) => `${pill(k)}<span class="num">${r.length}</span>`).join(" ") : "-"}</div></div>
     </div>
     ${s.orphan ? `<p class="warn" style="margin:12px 18px">ชื่อนี้อยู่ในคอลัมน์ "จนท" ของชีต แต่ไม่มีในรายชื่อเจ้าหน้าที่ กรุณาโอนงานให้เจ้าหน้าที่ในรายชื่อ</p>` : ""}
-    ${units.length > 1 ? `<div class="s-search"><input class="field" id="sq" type="search" placeholder="ค้นหาโครงการของ ${esc(s.first)} (ชื่อโครงการ หน่วยงาน รหัสงบ หรือเลขที่ PO)" aria-label="ค้นหาโครงการของเจ้าหน้าที่" value="${esc(state.sq || "")}"></div>` : ""}
+    ${units.length > 1 ? `<div class="s-search"><input class="field" id="sq" type="search" placeholder="ค้นหาโครงการ (ชื่อโครงการ หน่วยงาน รหัสงบ หรือเลขที่ PO)" aria-label="ค้นหาโครงการของเจ้าหน้าที่" value="${esc(state.sq || "")}"></div>` : ""}
     <div class="list-head"><span>ชื่อโครงการ · กดเพื่อเปลี่ยนสถานะ</span><span>วงเงิน (บาท)</span><span>สถานะ</span></div>
     <ul class="plist" id="splist"></ul>`;
   // ค้นหาเฉพาะโครงการของเจ้าหน้าที่คนนี้ (ไม่มีตัวกรองอื่น)
