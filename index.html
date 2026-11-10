@@ -1101,9 +1101,9 @@ function unitDetail(u) {
     `<li class="${x.paid ? "done" : ""}">งวดที่ ${i + 1}: ${x.amount != null ? baht(x.amount) : "-"}${x.paid ? " ✓" : ""}</li>`).join("")}</ul></dd></div>` : "";
   const money = u.contract != null || u.paid != null || u.po ? `
     ${u.po ? `<div><dt>เลขที่ PO</dt><dd class="num">${esc(u.po)}</dd></div>` : ""}
-    <div><dt>จำนวนเงินก่อหนี้</dt><dd class="num">${u.contract != null ? `${baht(u.contract)} บาท (${pct(u.contract, u.budget)} ของวงเงิน)` : "-"}</dd></div>
-    <div><dt>เบิกจ่ายแล้ว</dt><dd class="num">${u.paid != null ? `${baht(u.paid)} บาท (${pct(u.paid, u.budget)} ของวงเงิน)` : "-"}</dd></div>
-    ${u.done ? `<div><dt>เงินคงเหลือ (วงเงิน − เบิกจ่าย)</dt><dd class="num">${baht(u.remaining)} บาท (${pct(u.remaining, u.budget)})</dd></div>` : ""}` : "";
+    <div><dt>จำนวนเงินก่อหนี้</dt><dd class="num">${u.contract != null ? `${baht(u.contract)} บาท` : "-"}</dd></div>
+    <div><dt>เบิกจ่ายแล้ว</dt><dd class="num">${u.paid != null ? `${baht(u.paid)} บาท` : "-"}</dd></div>
+    ${u.done ? `<div><dt>เงินคงเหลือ (วงเงิน − เบิกจ่าย)</dt><dd class="num">${baht(u.remaining)} บาท</dd></div>` : ""}` : "";
   const common = `
     <div><dt>เจ้าหน้าที่รับผิดชอบ</dt><dd>${esc(fullName(u.staff))}${s?.voip ? ` · VOIP ${esc(s.voip)}` : ""}</dd></div>
     <div><dt>อัปเดตสถานะล่าสุด</dt><dd>${esc(fmtDate(u.updated) || "-")}</dd></div>${money}${instHtml}
