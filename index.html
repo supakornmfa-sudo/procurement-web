@@ -2269,7 +2269,7 @@ function fillExcelSheet(sheetXml, sstXml, stylesXml) {
       if (u) {
         const tone = statusInfo(u.status).tone;
         const depts = [...new Set(u.members.map(m => m.dept).filter(Boolean))].join(", ");
-        const name = u.isGroup ? `${u.name} (กลุ่ม ${u.members.length} รายการ)` : u.name;
+        const name = u.name;
         const status = statusSentence(u), method = [...new Set(u.members.map(m => m.method).filter(Boolean))].join(", ");
         cs.A && setNum(cs.A, ++seq); cs.B && setStr(cs.B, name); cs.C && setStr(cs.C, depts); cs.D && setNum(cs.D, Math.round(u.budget * 100) / 100);
         cs.E && setStr(cs.E, u.staff || ""); cs.F && setStr(cs.F, method); cs.G && setStr(cs.G, status);
