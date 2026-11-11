@@ -286,7 +286,7 @@ main { padding-block: 24px 64px; }
 .xcard ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 14px; }
 .xcard .btn { align-self: flex-start; }
 .x-date { width: 220px; max-width: 100%; }
-.x-date-val { border: 0; background: transparent; padding: 4px 0 0; font: inherit; font-size: 1.05rem; font-weight: 600; color: var(--ink); pointer-events: none; outline: none; width: 100%; }
+.x-date-val { border: 0; background: transparent; padding: 4px 0 0; font: inherit; font-size: 1.05rem; font-weight: 600; color: var(--ink); pointer-events: none; outline: none; width: 100%; caret-color: transparent; -webkit-text-fill-color: var(--ink); opacity: 1; cursor: default; }
 /* ตัวอย่างย่อส่วน: กระดาษสีขาวเสมอ (เหมือนเอกสารจริง) ทั้งโหมดกลางวัน/กลางคืน */
 .pv { position: relative; height: 380px; overflow: hidden; border: 1px solid var(--line); border-radius: 8px; background: #e9ecef; padding: 14px; }
 .pv::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 64px; background: linear-gradient(rgba(233, 236, 239, 0), #e9ecef); pointer-events: none; }
@@ -595,7 +595,7 @@ label.f .field { color: var(--ink); font-size: 15px; }
 
   <section class="view" id="view-export" hidden>
     <div class="page-head"><div><h1>นำออกข้อมูล</h1><p>สร้างเอกสาร Word และ Excel ตามแบบฟอร์มของหน่วยงาน จากข้อมูลล่าสุดในระบบ</p></div>
-      <label class="f x-date">ข้อมูล ณ วันที่<input class="x-date-val" id="x-date" readonly tabindex="-1"></label></div>
+      <label class="f x-date">ข้อมูล ณ วันที่<input class="x-date-val" id="x-date" readonly disabled tabindex="-1"></label></div>
     <div class="export-grid">
       <div class="panel xcard">
         <h2><span class="ficon" style="background:#185abd">DOCX</span>ข้อมูลประกอบการประชุมเร่งรัดงบประมาณ</h2>
